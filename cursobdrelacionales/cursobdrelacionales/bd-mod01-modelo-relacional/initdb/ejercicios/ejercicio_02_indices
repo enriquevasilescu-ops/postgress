@@ -1,60 +1,36 @@
-# Ejercicio 2 — Índices
-
-**Archivo sugerido:**  
-`ejercicios/ejercicio_02_indices.sql`
-
-## Enunciado
-
-Analizar el uso de índices en consultas frecuentes.
-
-## Script SQL
-
-```sql
--- Verificar consulta antes del índice
 EXPLAIN
 SELECT *
 FROM academia.profesores
 WHERE correo = 'profesor1@correo.com';
 
--- Crear índice sobre el correo de profesores
 CREATE INDEX idx_profesores_correo
 ON academia.profesores(correo);
 
--- Verificar consulta después del índice
 EXPLAIN
 SELECT *
 FROM academia.profesores
 WHERE correo = 'profesor1@correo.com';
 
--- Crear índice sobre el nombre del departamento
 CREATE INDEX idx_departamentos_nombre
 ON academia.departamentos(nombre);
 
--- Consulta usando EXPLAIN para departamentos
 EXPLAIN
 SELECT *
 FROM academia.departamentos
 WHERE nombre = 'Ingeniería';
-```
 
-## Comparación del plan de ejecución
+-- Comparación:
+-- Antes del índice:
+-- El motor realiza un recorrido completo de la tabla (Full Table Scan).
 
-### Antes del índice
-- El motor de base de datos realiza un recorrido completo de la tabla (*Full Table Scan*).
-- La consulta tarda más tiempo cuando existen muchos registros.
+-- Después del índice:
+-- El motor usa el índice para encontrar los datos más rápido,
+-- reduciendo tiempo y consumo de recursos.
 
-### Después del índice
-- El motor utiliza el índice para encontrar los datos rápidamente.
-- Se reduce el tiempo de búsqueda y el consumo de recursos.
-
-## ¿En qué columnas conviene crear índices?
-
-Conviene crear índices en:
-
-1. Columnas utilizadas frecuentemente en cláusulas `WHERE`.
-2. Columnas usadas en relaciones `JOIN`.
-3. Columnas utilizadas en `ORDER BY` y `GROUP BY`.
-4. Columnas con alta cardinalidad (muchos valores diferentes), como:
-   - correos electrónicos
-   - identificaciones
-   - códigos únicos
+-- ¿En qué columnas conviene crear índices?
+-- Conviene crear índices en:
+-- 1. Columnas usadas frecuentemente en WHERE.
+-- 2. Columnas utilizadas en JOIN.
+-- 3. Columnas usadas en ORDER BY y GROUP BY.
+-- 4. Columnas con muchos valores diferentes (alta cardinalidad),
+--    como correos, identificaciones o códigos.
