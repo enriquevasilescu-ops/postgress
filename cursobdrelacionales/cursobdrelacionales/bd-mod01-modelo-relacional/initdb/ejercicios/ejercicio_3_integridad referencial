@@ -1,25 +1,3 @@
-# Ejercicio 3 — Integridad referencial
-
-**Archivo sugerido:**  
-`ejercicios/ejercicio_03_integridad_referencial.sql`
-
-## Enunciado
-
-Comprobar cómo PostgreSQL protege las relaciones entre tablas.
-
-## Actividades
-
-1. Intentar insertar un profesor con un `id_departamento` inexistente.
-2. Observar el error generado.
-3. Intentar eliminar un departamento que tiene profesores asociados.
-4. Explicar por qué PostgreSQL bloquea la operación.
-5. Cambiar temporalmente la regla a `ON DELETE CASCADE` y analizar el riesgo.
-
-
-
-# Script SQL
-
-
 INSERT INTO academia.profesores (
     id_departamento,
     nombre,
@@ -37,14 +15,13 @@ VALUES (
 
 ------------------------------------------------------------
 
+
 DELETE FROM academia.departamentos
 WHERE id_departamento = 1;
 
 -- Resultado esperado:
 -- ERROR: update or delete on table "departamentos"
 -- violates foreign key constraint
-
-------------------------------------------------------------
 
 ALTER TABLE academia.profesores
 DROP CONSTRAINT profesores_id_departamento_fkey;
@@ -55,36 +32,22 @@ FOREIGN KEY (id_departamento)
 REFERENCES academia.departamentos(id_departamento)
 ON DELETE CASCADE;
 
-------------------------------------------------------------
-
-
+-- Probar eliminación nuevamente
 DELETE FROM academia.departamentos
 WHERE id_departamento = 1;
 
--- Resultado:
--- El departamento se elimina junto con todos
--- los profesores relacionados.
-```
+-- Resultado esperado:
+-- El departamento y todos los profesores asociados
+-- serán eliminados automáticamente.
 
-# Explicación
-
-## ¿Por qué PostgreSQL bloquea la operación?
-
-PostgreSQL utiliza claves foráneas (*Foreign Keys*) para mantener la integridad referencial entre tablas.  
-Esto evita que existan registros relacionados con datos inexistentes.
-
-Por ejemplo:
-- Un profesor no puede pertenecer a un departamento que no existe.
-- Un departamento no puede eliminarse si todavía tiene profesores asociados.
-
-## Riesgo de usar `ON DELETE CASCADE`
-
-La opción `ON DELETE CASCADE` elimina automáticamente todos los registros relacionados cuando se elimina el registro principal.
-
-### Riesgos:
-- Pérdida accidental de información.
-- Eliminación masiva de datos relacionados.
-- Difícil recuperación si no existen respaldos.
-
-### Ventaja:
-- Mantiene automáticamente la consistencia de los datos.
+-- Explicación:
+-- PostgreSQL usa claves foráneas para mantener
+-- la integridad referencial entre tablas.
+--
+-- Esto evita:
+-- 1. Insertar registros relacionados con datos inexistentes.
+-- 2. Eliminar registros principales que aún tienen dependencias.
+--
+-- Riesgo de ON DELETE CASCADE:
+-- Puede eliminar múltiples registros automáticamente,
+-- provocando pérdida accidental de información.
